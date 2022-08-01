@@ -31,10 +31,10 @@ suspend fun main() {
 }
 
 private suspend fun getHelloWorld(count: Int): String {
-    val helloWorld: String = SemaphoreBulkheadUtils.executeUsingB3ISemaphoreBulkhead {
+    val helloWorld: String = SemaphoreBulkheadUtils.executeSuspending {
         println("Request $count started!!")
         val responseText = try {
-            b3HttpTokenClientInstance.get("http://localhost:8080/hello-world").bodyAsText()
+            client.get("http://localhost:8080/hello-world").bodyAsText()
         }catch (e: Exception) {
             "Something is wrong!"
         }
@@ -44,7 +44,7 @@ private suspend fun getHelloWorld(count: Int): String {
     return helloWorld
 }
 
-private val b3HttpTokenClientInstance = HttpClient(CIO) {
+private val client = HttpClient(CIO) {
     expectSuccess = true
     install(Logging) {
         logger = Logger.DEFAULT
@@ -118,7 +118,7 @@ object SemaphoreBulkheadUtils {
         .build()
     private val unique = BulkheadRegistry.of(config).bulkhead("DEFAULT")
 
-    suspend fun <T> executeUsingB3ISemaphoreBulkhead(block: suspend () -> T): T{
+    suspend fun <T> executeSuspending(block: suspend () -> T): T{
         return unique.executeSuspendFunction { block.invoke() }
     }
 }

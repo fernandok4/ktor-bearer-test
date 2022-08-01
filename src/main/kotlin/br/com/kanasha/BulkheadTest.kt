@@ -11,7 +11,7 @@ class BulkheadTest
 
 suspend fun main() {
     repeat(10000){
-        executeUsingB3ISemaphoreBulkhead {
+        executeSuspending {
             println("Começou: $it")
             delay(1000)
             println("Terminou: $it")
@@ -24,6 +24,6 @@ private val config = BulkheadConfig.custom()
     .maxWaitDuration(Duration.of(24, ChronoUnit.HOURS))
     .build()
 
-suspend fun <T> executeUsingB3ISemaphoreBulkhead(block: suspend () -> T): T{
+suspend fun <T> executeSuspending(block: suspend () -> T): T{
     return BulkheadRegistry.of(config).bulkhead("DEFAULT").executeSuspendFunction { block.invoke() }
 }
